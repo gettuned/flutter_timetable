@@ -1,7 +1,7 @@
 
-[![Pub Version](https://img.shields.io/pub/v/flutter_timetable)](https://pub.dev/packages/flutter_timetable)
+<!-- [![Pub Version](https://img.shields.io/pub/v/flutter_timetable)](https://pub.dev/packages/flutter_timetable)
 [![Test status](https://github.com/yourfriendken/flutter_timetable/actions/workflows/tests.yml/badge.svg?style=for-the-badge)](https://github.com/yourfriendken/flutter_timetable/actions/workflows/tests.yml)
-[![codecov](https://codecov.io/gh/yourfriendken/flutter_timetable/branch/main/graph/badge.svg?token=63VTEILRUG)](https://codecov.io/gh/yourfriendken/flutter_timetable)
+[![codecov](https://codecov.io/gh/yourfriendken/flutter_timetable/branch/main/graph/badge.svg?token=63VTEILRUG)](https://codecov.io/gh/yourfriendken/flutter_timetable) -->
 
 # Timetable for Flutter
 
@@ -22,10 +22,10 @@ Intentionally avoiding dependencies makes this package lightweight, increases co
 
 Limiting the scope of this package to just the timetable widget avoids superfluous features and potential bloat. For example, instead of anticipating and building components, the `TimtableController` allows listeners and dispatches events, allowing developers to build more customized UI where needed.
 
-| Defaults out of the box | Using customized builders and controllers |
+<!-- | Defaults out of the box | Using customized builders and controllers |
 | ------- | ----------- |
 | ![Plain old timetable](https://github.com/yourfriendken/flutter_timetable/raw/main/images/default.gif) | ![Timetable with all the builders, a controller, etc,](https://github.com/yourfriendken/flutter_timetable/raw/main/images/custom.gif) |
-
+ -->
 
 ```dart
 import 'dart:math';

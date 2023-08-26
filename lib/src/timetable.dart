@@ -40,23 +40,27 @@ class Timetable<T> extends StatefulWidget {
   /// Color of indicator line that shows the current time. Default is `Theme.indicatorColor`.
   final Color? nowIndicatorColor;
 
+  /// Physics to use for horizontal scrolling
+  final ScrollPhysics? horizontalScrollPhysics;
+
   /// The [Timetable] widget displays calendar like view of the events that scrolls
   /// horizontally through the days and vertical through the hours.
   /// <img src="https://github.com/gettuned/flutter_timetable/raw/main/images/default.gif" width="400" />
-  const Timetable({
-    Key? key,
-    this.controller,
-    this.cellBuilder,
-    this.headerCellBuilder,
-    this.items = const [],
-    this.itemBuilder,
-    this.hourLabelBuilder,
-    this.nowIndicatorColor,
-    this.cornerBuilder,
-    this.snapToDay = true,
-    this.snapAnimationDuration = const Duration(milliseconds: 300),
-    this.snapAnimationCurve = Curves.bounceOut
-  }) : super(key: key);
+  const Timetable(
+      {Key? key,
+      this.controller,
+      this.cellBuilder,
+      this.headerCellBuilder,
+      this.items = const [],
+      this.itemBuilder,
+      this.hourLabelBuilder,
+      this.nowIndicatorColor,
+      this.cornerBuilder,
+      this.snapToDay = true,
+      this.snapAnimationDuration = const Duration(milliseconds: 300),
+      this.snapAnimationCurve = Curves.bounceOut,
+      this.horizontalScrollPhysics})
+      : super(key: key);
 
   @override
   State<Timetable<T>> createState() => _TimetableState<T>();
@@ -150,18 +154,20 @@ class _TimetableState<T> extends State<Timetable<T>> {
                       onNotification: (notification) {
                         if (_isTableScrolling) return false;
                         if (notification is ScrollEndNotification) {
-                          _snapToCloset();
+                          _snapToClosest();
                           _updateVisibleDate();
                           _isHeaderScrolling = false;
                           return true;
+                        } else if (notification is ScrollUpdateNotification) {
+                          _isHeaderScrolling = true;
+                          _dayScrollController.jumpTo(
+                              _dayHeadingScrollController.position.pixels);
                         }
-                        _isHeaderScrolling = true;
-                        _dayScrollController.jumpTo(
-                            _dayHeadingScrollController.position.pixels);
                         return false;
                       },
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
+                        physics: widget.horizontalScrollPhysics,
                         controller: _dayHeadingScrollController,
                         itemExtent: columnWidth,
                         itemBuilder: (context, i) => SizedBox(
@@ -178,16 +184,21 @@ class _TimetableState<T> extends State<Timetable<T>> {
               child: NotificationListener<ScrollNotification>(
                 onNotification: (notification) {
                   if (_isHeaderScrolling) return false;
-
                   if (notification is ScrollEndNotification) {
-                    _snapToCloset();
+                    _snapToClosest();
                     _updateVisibleDate();
                     _isTableScrolling = false;
                     return true;
                   }
-                  _isTableScrolling = true;
-                  _dayHeadingScrollController
-                      .jumpTo(_dayScrollController.position.pixels);
+                  if (notification is ScrollUpdateNotification &&
+                      (notification.metrics.axisDirection ==
+                              AxisDirection.right ||
+                          notification.metrics.axisDirection ==
+                              AxisDirection.left)) {
+                    _isTableScrolling = true;
+                    _dayHeadingScrollController
+                        .jumpTo(_dayScrollController.position.pixels);
+                  }
                   return true;
                 },
                 child: SingleChildScrollView(
@@ -218,6 +229,7 @@ class _TimetableState<T> extends State<Timetable<T>> {
                             // cacheExtent: 10000.0,
                             itemExtent: columnWidth,
                             controller: _dayScrollController,
+                            physics: widget.horizontalScrollPhysics,
                             itemBuilder: (context, index) {
                               final date =
                                   controller.start.add(Duration(days: index));
@@ -378,7 +390,7 @@ class _TimetableState<T> extends State<Timetable<T>> {
   }
 
   bool _isSnapping = false;
-  Future _snapToCloset() async {
+  Future _snapToClosest() async {
     if (_isSnapping || !widget.snapToDay) return;
     _isSnapping = true;
     await Future.microtask(() => null);
@@ -413,17 +425,10 @@ class _TimetableState<T> extends State<Timetable<T>> {
         (date.difference(controller.start).inDays) * columnWidth;
     final hourPosition =
         ((date.hour) * controller.cellHeight) - (controller.cellHeight / 2);
-    await Future.wait([
-      _dayScrollController.animateTo(
-        datePosition,
-        duration: widget.snapAnimationDuration,
-        curve: widget.snapAnimationCurve,
-      ),
-      _timeScrollController.animateTo(
-        hourPosition,
-        duration: widget.snapAnimationDuration,
-        curve: widget.snapAnimationCurve,
-      ),
-    ]);
+    _dayScrollController.jumpTo(datePosition
+        );
+    _timeScrollController.jumpTo(
+      hourPosition,
+    );
   }
 }

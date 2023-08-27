@@ -425,7 +425,7 @@ class _TimetableState<T> extends State<Timetable<T>> {
 
   _updateVisibleDate() async {
     final date = controller.start.add(Duration(
-      days: _dayHeadingScrollController.position.pixels ~/ columnWidth,
+      days: (_dayHeadingScrollController.position.pixels / columnWidth).round(),
       hours: _timeScrollController.position.pixels ~/ controller.cellHeight,
     ));
     if (date != controller.visibleDateStart) {

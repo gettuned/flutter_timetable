@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_timetable/src/timetable_page_scroll_physics.dart';
 import 'package:intl/intl.dart';
 
 import '../flutter_timetable.dart';
@@ -40,8 +41,8 @@ class Timetable<T> extends StatefulWidget {
   /// Color of indicator line that shows the current time. Default is `Theme.indicatorColor`.
   final Color? nowIndicatorColor;
 
-  /// Physics to use for horizontal scrolling
-  final ScrollPhysics? horizontalScrollPhysics;
+  /// Determine whether to scroll a single page at a time
+  final bool? usePageScroll;
 
   /// The [Timetable] widget displays calendar like view of the events that scrolls
   /// horizontally through the days and vertical through the hours.
@@ -59,7 +60,7 @@ class Timetable<T> extends StatefulWidget {
       this.snapToDay = true,
       this.snapAnimationDuration = const Duration(milliseconds: 300),
       this.snapAnimationCurve = Curves.bounceOut,
-      this.horizontalScrollPhysics})
+      this.usePageScroll})
       : super(key: key);
 
   @override
@@ -70,6 +71,12 @@ class _TimetableState<T> extends State<Timetable<T>> {
   final _dayScrollController = ScrollController();
   final _dayHeadingScrollController = ScrollController();
   final _timeScrollController = ScrollController();
+
+  final TimetablePageScrollPhysics headerPageScrollPhysics =
+      const TimetablePageScrollPhysics();
+  final TimetablePageScrollPhysics bodyPageScrollPhysics =
+      const TimetablePageScrollPhysics();
+
   double columnWidth = 50.0;
   TimetableController controller = TimetableController();
   final _key = GlobalKey();
@@ -167,7 +174,9 @@ class _TimetableState<T> extends State<Timetable<T>> {
                       },
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
-                        physics: widget.horizontalScrollPhysics,
+                        physics: widget.usePageScroll == true
+                            ? headerPageScrollPhysics
+                            : null,
                         controller: _dayHeadingScrollController,
                         itemExtent: columnWidth,
                         itemBuilder: (context, i) => SizedBox(
@@ -229,7 +238,9 @@ class _TimetableState<T> extends State<Timetable<T>> {
                             // cacheExtent: 10000.0,
                             itemExtent: columnWidth,
                             controller: _dayScrollController,
-                            physics: widget.horizontalScrollPhysics,
+                            physics: widget.usePageScroll == true
+                                ? bodyPageScrollPhysics
+                                : null,
                             itemBuilder: (context, index) {
                               final date =
                                   controller.start.add(Duration(days: index));
@@ -394,8 +405,11 @@ class _TimetableState<T> extends State<Timetable<T>> {
     if (_isSnapping || !widget.snapToDay) return;
     _isSnapping = true;
     await Future.microtask(() => null);
+    final snapWidth = widget.usePageScroll == true
+        ? columnWidth * (widget.controller?.columns ?? 1)
+        : columnWidth;
     final snapPosition =
-        ((_dayScrollController.offset) / columnWidth).round() * columnWidth;
+        ((_dayScrollController.offset) / snapWidth).round() * snapWidth;
     _dayScrollController.animateTo(
       snapPosition,
       duration: widget.snapAnimationDuration,
@@ -425,8 +439,7 @@ class _TimetableState<T> extends State<Timetable<T>> {
         (date.difference(controller.start).inDays) * columnWidth;
     final hourPosition =
         ((date.hour) * controller.cellHeight) - (controller.cellHeight / 2);
-    _dayScrollController.jumpTo(datePosition
-        );
+    _dayScrollController.jumpTo(datePosition);
     _timeScrollController.jumpTo(
       hourPosition,
     );

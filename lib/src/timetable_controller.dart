@@ -25,7 +25,7 @@ class TimetableController {
     Function(TimetableControllerEvent)? onEvent,
   }) {
     _columns = initialColumns;
-    _start = DateUtils.dateOnly(start ?? DateTime.now());
+    _start = DateUtils.dateOnly(start ?? DateTime.now()).toUtc();
     _cellHeight = cellHeight ?? 50;
     _headerHeight = headerHeight ?? 50;
     _timelineWidth = timelineWidth ?? 50;

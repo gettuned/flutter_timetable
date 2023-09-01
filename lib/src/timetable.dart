@@ -46,6 +46,8 @@ class Timetable<T> extends StatefulWidget {
   /// ScrollType to use
   final ScrollType? scrollType;
 
+  final Future<void> Function()? onRefresh;
+
   /// The [Timetable] widget displays calendar like view of the events that scrolls
   /// horizontally through the days and vertical through the hours.
   /// <img src="https://github.com/gettuned/flutter_timetable/raw/main/images/default.gif" width="400" />
@@ -62,7 +64,8 @@ class Timetable<T> extends StatefulWidget {
       this.snapToDay = true,
       this.snapAnimationDuration = const Duration(milliseconds: 300),
       this.snapAnimationCurve = Curves.bounceOut,
-      this.scrollType = ScrollType.none})
+      this.scrollType = ScrollType.none,
+      this.onRefresh})
       : super(key: key);
 
   @override
@@ -212,113 +215,122 @@ class _TimetableState<T> extends State<Timetable<T>> {
                   }
                   return true;
                 },
-                child: SingleChildScrollView(
-                  controller: _timeScrollController,
-                  child: SizedBox(
-                    height: controller.cellHeight * 24.0,
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: controller.timelineWidth,
-                          height: controller.cellHeight * 24.0,
-                          child: Column(
-                            children: [
-                              SizedBox(height: controller.cellHeight / 2),
-                              for (var i = 1; i < 24; i++) //
-                                SizedBox(
-                                  height: controller.cellHeight,
-                                  child: Center(
-                                      child: _buildHour(
-                                          TimeOfDay(hour: i, minute: 0))),
-                                ),
-                            ],
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    if (widget.onRefresh != null) {
+                      await widget.onRefresh!();
+                    }
+                  },
+                  child: SingleChildScrollView(
+                    controller: _timeScrollController,
+                    child: SizedBox(
+                      height: controller.cellHeight * 24.0,
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: controller.timelineWidth,
+                            height: controller.cellHeight * 24.0,
+                            child: Column(
+                              children: [
+                                SizedBox(height: controller.cellHeight / 2),
+                                for (var i = 1; i < 24; i++) //
+                                  SizedBox(
+                                    height: controller.cellHeight,
+                                    child: Center(
+                                        child: _buildHour(
+                                            TimeOfDay(hour: i, minute: 0))),
+                                  ),
+                              ],
+                            ),
                           ),
-                        ),
-                        Expanded(
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            // cacheExtent: 10000.0,
-                            itemExtent: columnWidth,
-                            controller: _dayScrollController,
-                            physics: _horizontalScrollPhysics,
-                            itemBuilder: (context, index) {
-                              final date =
-                                  controller.start.add(Duration(days: index));
-                              final events = widget.items
-                                  .where((event) =>
-                                      DateUtils.isSameDay(date, event.start))
-                                  .toList();
-                              final now = DateTime.now();
-                              final isToday = DateUtils.isSameDay(date, now);
-                              return Container(
-                                clipBehavior: Clip.none,
-                                width: columnWidth,
-                                height: controller.cellHeight * 24.0,
-                                child: Stack(
+                          Expanded(
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              // cacheExtent: 10000.0,
+                              itemExtent: columnWidth,
+                              controller: _dayScrollController,
+                              physics: _horizontalScrollPhysics,
+                              itemBuilder: (context, index) {
+                                final date =
+                                    controller.start.add(Duration(days: index));
+                                final events = widget.items
+                                    .where((event) =>
+                                        DateUtils.isSameDay(date, event.start))
+                                    .toList();
+                                final now = DateTime.now();
+                                final isToday = DateUtils.isSameDay(date, now);
+                                return Container(
                                   clipBehavior: Clip.none,
-                                  children: [
-                                    Column(
-                                      children: [
-                                        for (int i = 0; i < 24; i++)
-                                          SizedBox(
-                                            width: columnWidth,
-                                            height: controller.cellHeight,
-                                            child: Center(
-                                              child: _buildCell(
-                                                  DateUtils.dateOnly(date)
-                                                      .add(Duration(hours: i))),
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                    for (final TimetableItem<T> event in events)
-                                      Positioned(
-                                        top: (event.start.hour +
-                                                (event.start.minute / 60)) *
-                                            controller.cellHeight,
-                                        width: columnWidth,
-                                        height: event.duration.inMinutes *
-                                            controller.cellHeight /
-                                            60,
-                                        child: _buildEvent(event),
-                                      ),
-                                    if (isToday)
-                                      Positioned(
-                                        top: ((now.hour + (now.minute / 60.0)) *
-                                                controller.cellHeight) -
-                                            1,
-                                        width: columnWidth,
-                                        child: Stack(
-                                          clipBehavior: Clip.none,
-                                          children: [
-                                            Container(
-                                              clipBehavior: Clip.none,
-                                              color: nowIndicatorColor,
-                                              height: 2,
-                                              width: columnWidth + 1,
-                                            ),
-                                            Positioned(
-                                              top: -2,
-                                              left: -2,
-                                              child: Container(
-                                                decoration: BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  color: nowIndicatorColor,
-                                                ),
-                                                height: 6,
-                                                width: 6,
+                                  width: columnWidth,
+                                  height: controller.cellHeight * 24.0,
+                                  child: Stack(
+                                    clipBehavior: Clip.none,
+                                    children: [
+                                      Column(
+                                        children: [
+                                          for (int i = 0; i < 24; i++)
+                                            SizedBox(
+                                              width: columnWidth,
+                                              height: controller.cellHeight,
+                                              child: Center(
+                                                child: _buildCell(DateUtils
+                                                        .dateOnly(date)
+                                                    .add(Duration(hours: i))),
                                               ),
                                             ),
-                                          ],
-                                        ),
+                                        ],
                                       ),
-                                  ],
-                                ),
-                              );
-                            },
+                                      for (final TimetableItem<T> event
+                                          in events)
+                                        Positioned(
+                                          top: (event.start.hour +
+                                                  (event.start.minute / 60)) *
+                                              controller.cellHeight,
+                                          width: columnWidth,
+                                          height: event.duration.inMinutes *
+                                              controller.cellHeight /
+                                              60,
+                                          child: _buildEvent(event),
+                                        ),
+                                      if (isToday)
+                                        Positioned(
+                                          top: ((now.hour +
+                                                      (now.minute / 60.0)) *
+                                                  controller.cellHeight) -
+                                              1,
+                                          width: columnWidth,
+                                          child: Stack(
+                                            clipBehavior: Clip.none,
+                                            children: [
+                                              Container(
+                                                clipBehavior: Clip.none,
+                                                color: nowIndicatorColor,
+                                                height: 2,
+                                                width: columnWidth + 1,
+                                              ),
+                                              Positioned(
+                                                top: -2,
+                                                left: -2,
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    color: nowIndicatorColor,
+                                                  ),
+                                                  height: 6,
+                                                  width: 6,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),

@@ -42,3 +42,27 @@ class TimetableHeavyScrollPhysics extends ScrollPhysics {
   @override
   double get minFlingDistance => double.infinity;
 }
+
+class TimetableMediumScrollPhysics extends ScrollPhysics {
+  const TimetableMediumScrollPhysics(
+      {ScrollPhysics? parent})
+      : super(parent: parent);
+
+  @override
+  TimetableMediumScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return TimetableMediumScrollPhysics(
+        parent: buildParent(ancestor));
+  }
+
+  @override
+  double get dragStartDistanceMotionThreshold => 10;
+
+  @override
+  double get minFlingVelocity => 5;
+
+  @override
+  double get maxFlingVelocity => 1000;
+
+  @override
+  double get minFlingDistance => 10;
+}

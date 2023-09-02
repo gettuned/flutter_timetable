@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../flutter_timetable.dart';
 
-enum ScrollType { heavy, page, none }
+enum ScrollType { heavy, medium, page, none }
 
 /// The [Timetable] widget displays calendar like view of the events that scrolls
 /// horizontally through the days and vertical through the hours.
@@ -90,17 +90,30 @@ class _TimetableState<T> extends State<Timetable<T>> {
   void initState() {
     controller = widget.controller ?? controller;
     _listenerId = controller.addListener(_eventHandler);
-    _horizontalScrollPhysics = widget.scrollType == ScrollType.page
-        ? const TimetablePageScrollPhysics()
-        : widget.scrollType == ScrollType.heavy
-            ? const TimetableHeavyScrollPhysics()
-            : null;
+    _horizontalScrollPhysics = _getHorizontalScrollPhysics();
+
     if (widget.items.isNotEmpty) {
       widget.items.sort((a, b) => a.start.compareTo(b.start));
     }
     WidgetsBinding.instance.addPostFrameCallback((_) => adjustColumnWidth());
 
     super.initState();
+  }
+
+  ScrollPhysics? _getHorizontalScrollPhysics() {
+    switch (widget.scrollType) {
+      case ScrollType.heavy:
+        return const TimetableHeavyScrollPhysics();
+
+      case ScrollType.medium:
+        return const TimetableMediumScrollPhysics();
+
+      case ScrollType.page:
+        return const TimetablePageScrollPhysics();
+      case ScrollType.none:
+      case null:
+        return null;
+    }
   }
 
   @override

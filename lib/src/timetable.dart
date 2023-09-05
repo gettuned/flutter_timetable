@@ -270,6 +270,8 @@ class _TimetableState<T> extends State<Timetable<T>> {
                                     .where((event) =>
                                         DateUtils.isSameDay(date, event.start))
                                     .toList();
+                                final groupedOverlappingEvents =
+                                    _getGroupedOverlappingEvents(events);
                                 final now = DateTime.now();
                                 final isToday = DateUtils.isSameDay(date, now);
                                 return Container(
@@ -293,18 +295,31 @@ class _TimetableState<T> extends State<Timetable<T>> {
                                             ),
                                         ],
                                       ),
-                                      for (final TimetableItem<T> event
-                                          in events)
-                                        Positioned(
-                                          top: (event.start.hour +
-                                                  (event.start.minute / 60)) *
-                                              controller.cellHeight,
-                                          width: columnWidth,
-                                          height: event.duration.inMinutes *
-                                              controller.cellHeight /
-                                              60,
-                                          child: _buildEvent(event),
-                                        ),
+                                      for (final List<
+                                              TimetableItem<T>> eventGroup
+                                          in groupedOverlappingEvents)
+                                        for (int i = 0;
+                                            i < eventGroup.length;
+                                            i++)
+                                          Positioned(
+                                            top: (eventGroup[i].start.hour +
+                                                    (eventGroup[i]
+                                                            .start
+                                                            .minute /
+                                                        60)) *
+                                                controller.cellHeight,
+                                            height: eventGroup[i]
+                                                    .duration
+                                                    .inMinutes *
+                                                controller.cellHeight /
+                                                60,
+                                            left: columnWidth /
+                                                eventGroup.length *
+                                                i,
+                                            width:
+                                                columnWidth / eventGroup.length,
+                                            child: _buildEvent(eventGroup[i]),
+                                          ),
                                       if (isToday)
                                         Positioned(
                                           top: ((now.hour +
@@ -470,5 +485,24 @@ class _TimetableState<T> extends State<Timetable<T>> {
       _timeScrollController.animateTo(hourPosition,
           duration: const Duration(microseconds: 1), curve: Curves.linear)
     ]);
+  }
+
+  List<List<TimetableItem<T>>> _getGroupedOverlappingEvents(
+      List<TimetableItem<T>> events) {
+    events.sort((a, b) => a.start.compareTo(b.start));
+    List<List<TimetableItem<T>>> overlappingList = [];
+    for (var element in events) {
+      if (overlappingList.isEmpty) {
+        overlappingList.add(List.of([element]));
+        continue;
+      }
+      if (overlappingList.last
+          .any((prev) => element.start.compareTo(prev.end) < 0)) {
+        overlappingList.last.add(element);
+      } else {
+        overlappingList.add(List.of([element]));
+      }
+    }
+    return overlappingList;
   }
 }

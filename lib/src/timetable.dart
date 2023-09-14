@@ -129,7 +129,7 @@ class _TimetableState<T> extends State<Timetable<T>> {
 
   _eventHandler(TimetableControllerEvent event) async {
     if (event is TimetableJumpToRequested) {
-      _jumpTo(event.date);
+      _jumpTo(event.date, animate: event.animate);
     }
 
     if (event is TimetableColumnsChanged) {
@@ -474,17 +474,23 @@ class _TimetableState<T> extends State<Timetable<T>> {
     }
   }
 
-  Future _jumpTo(DateTime date) async {
+  Future _jumpTo(DateTime date, {bool? animate = false}) async {
+    final animationDuration = animate == true
+        ? const Duration(milliseconds: 500)
+        : const Duration(microseconds: 1);
     final datePosition =
         (date.difference(controller.start).inDays) * columnWidth;
     final hourPosition =
         ((date.hour) * controller.cellHeight) - (controller.cellHeight / 2);
+    _isSnapping = true;
     await Future.wait([
       _dayScrollController.animateTo(datePosition,
-          duration: const Duration(microseconds: 1), curve: Curves.linear),
+          duration: animationDuration, curve: Curves.linear),
       _timeScrollController.animateTo(hourPosition,
-          duration: const Duration(microseconds: 1), curve: Curves.linear)
+          duration: animationDuration, curve: Curves.linear)
     ]);
+    _isSnapping = false;
+    _snapToClosest();
   }
 
   List<List<TimetableItem<T>>> _getGroupedOverlappingEvents(

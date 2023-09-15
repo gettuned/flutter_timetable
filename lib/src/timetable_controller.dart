@@ -98,8 +98,8 @@ class TimetableController {
   }
 
   /// Scrolls the timetable to the given date and time.
-  void animateTo(DateTime date) {
-    dispatch(TimetableJumpToRequested(date, animate: true));
+  void animateTo(DateTime date, {Duration? duration}) {
+    dispatch(TimetableJumpToRequested(date, animationDuration: duration));
   }
 
   /// Updates the number of columns in the timetable
@@ -141,9 +141,9 @@ class TimetableColumnsChanged extends TimetableControllerEvent {
 
 /// Event used to scroll the timetable to a given date and time
 class TimetableJumpToRequested extends TimetableControllerEvent {
-  TimetableJumpToRequested(this.date, {this.animate = false});
+  TimetableJumpToRequested(this.date, {this.animationDuration});
   final DateTime date;
-  final bool animate;
+  final Duration? animationDuration;
 }
 
 /// Event dispatched when the start date of the timetable changes

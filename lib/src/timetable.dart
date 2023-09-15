@@ -129,7 +129,7 @@ class _TimetableState<T> extends State<Timetable<T>> {
 
   _eventHandler(TimetableControllerEvent event) async {
     if (event is TimetableJumpToRequested) {
-      _jumpTo(event.date, animate: event.animate);
+      _jumpTo(event.date, animationDuration: event.animationDuration);
     }
 
     if (event is TimetableColumnsChanged) {
@@ -474,10 +474,8 @@ class _TimetableState<T> extends State<Timetable<T>> {
     }
   }
 
-  Future _jumpTo(DateTime date, {bool? animate = false}) async {
-    final animationDuration = animate == true
-        ? const Duration(milliseconds: 500)
-        : const Duration(microseconds: 1);
+  Future _jumpTo(DateTime date, {Duration? animationDuration}) async {
+    final duration = animationDuration ?? const Duration(microseconds: 1);
     final datePosition =
         (date.difference(controller.start).inDays) * columnWidth;
     final hourPosition =
@@ -485,9 +483,9 @@ class _TimetableState<T> extends State<Timetable<T>> {
     _isSnapping = true;
     await Future.wait([
       _dayScrollController.animateTo(datePosition,
-          duration: animationDuration, curve: Curves.linear),
+          duration: duration, curve: Curves.linear),
       _timeScrollController.animateTo(hourPosition,
-          duration: animationDuration, curve: Curves.linear)
+          duration: duration, curve: Curves.linear)
     ]);
     _isSnapping = false;
     _snapToClosest();

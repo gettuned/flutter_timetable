@@ -83,8 +83,7 @@ class _TimetableState<T> extends State<Timetable<T>> {
 
   ScrollPhysics? _horizontalScrollPhysics;
 
-  Color get nowIndicatorColor =>
-      widget.nowIndicatorColor ?? Theme.of(context).indicatorColor;
+  Color get nowIndicatorColor => widget.nowIndicatorColor ?? Theme.of(context).indicatorColor;
   int? _listenerId;
   @override
   void initState() {
@@ -149,8 +148,7 @@ class _TimetableState<T> extends State<Timetable<T>> {
     if (box.hasSize) {
       final size = box.size;
       final layoutWidth = size.width;
-      final width =
-          (layoutWidth - controller.timelineWidth) / controller.columns;
+      final width = (layoutWidth - controller.timelineWidth) / controller.columns;
       if (width != columnWidth) {
         columnWidth = width;
         await Future.microtask(() => null);
@@ -188,8 +186,7 @@ class _TimetableState<T> extends State<Timetable<T>> {
                           return true;
                         } else if (notification is ScrollUpdateNotification) {
                           _isHeaderScrolling = true;
-                          _dayScrollController.jumpTo(
-                              _dayHeadingScrollController.position.pixels);
+                          _dayScrollController.jumpTo(_dayHeadingScrollController.position.pixels);
                         }
                         return false;
                       },
@@ -218,13 +215,10 @@ class _TimetableState<T> extends State<Timetable<T>> {
                     _isTableScrolling = false;
                     return true;
                   } else if (notification is ScrollUpdateNotification &&
-                      (notification.metrics.axisDirection ==
-                              AxisDirection.right ||
-                          notification.metrics.axisDirection ==
-                              AxisDirection.left)) {
+                      (notification.metrics.axisDirection == AxisDirection.right ||
+                          notification.metrics.axisDirection == AxisDirection.left)) {
                     _isTableScrolling = true;
-                    _dayHeadingScrollController
-                        .jumpTo(_dayScrollController.position.pixels);
+                    _dayHeadingScrollController.jumpTo(_dayScrollController.position.pixels);
                   }
                   return true;
                 },
@@ -249,9 +243,7 @@ class _TimetableState<T> extends State<Timetable<T>> {
                                 for (var i = 1; i < 24; i++) //
                                   SizedBox(
                                     height: controller.cellHeight,
-                                    child: Center(
-                                        child: _buildHour(
-                                            TimeOfDay(hour: i, minute: 0))),
+                                    child: Center(child: _buildHour(TimeOfDay(hour: i, minute: 0))),
                                   ),
                               ],
                             ),
@@ -264,14 +256,10 @@ class _TimetableState<T> extends State<Timetable<T>> {
                               controller: _dayScrollController,
                               physics: _horizontalScrollPhysics,
                               itemBuilder: (context, index) {
-                                final date =
-                                    controller.start.add(Duration(days: index));
-                                final events = widget.items
-                                    .where((event) =>
-                                        DateUtils.isSameDay(date, event.start))
-                                    .toList();
-                                final groupedOverlappingEvents =
-                                    _getGroupedOverlappingEvents(events);
+                                final date = controller.start.add(Duration(days: index));
+                                final events =
+                                    widget.items.where((event) => DateUtils.isSameDay(date, event.start)).toList();
+                                final groupedOverlappingEvents = _getGroupedOverlappingEvents(events);
                                 final now = DateTime.now();
                                 final isToday = DateUtils.isSameDay(date, now);
                                 return Container(
@@ -288,44 +276,24 @@ class _TimetableState<T> extends State<Timetable<T>> {
                                               width: columnWidth,
                                               height: controller.cellHeight,
                                               child: Center(
-                                                child: _buildCell(DateUtils
-                                                        .dateOnly(date)
-                                                    .add(Duration(hours: i))),
+                                                child: _buildCell(DateUtils.dateOnly(date).add(Duration(hours: i))),
                                               ),
                                             ),
                                         ],
                                       ),
-                                      for (final List<
-                                              TimetableItem<T>> eventGroup
-                                          in groupedOverlappingEvents)
-                                        for (int i = 0;
-                                            i < eventGroup.length;
-                                            i++)
+                                      for (final List<TimetableItem<T>> eventGroup in groupedOverlappingEvents)
+                                        for (int i = 0; i < eventGroup.length; i++)
                                           Positioned(
-                                            top: (eventGroup[i].start.hour +
-                                                    (eventGroup[i]
-                                                            .start
-                                                            .minute /
-                                                        60)) *
+                                            top: (eventGroup[i].start.hour + (eventGroup[i].start.minute / 60)) *
                                                 controller.cellHeight,
-                                            height: eventGroup[i]
-                                                    .duration
-                                                    .inMinutes *
-                                                controller.cellHeight /
-                                                60,
-                                            left: columnWidth /
-                                                eventGroup.length *
-                                                i,
-                                            width:
-                                                columnWidth / eventGroup.length,
+                                            height: eventGroup[i].duration.inMinutes * controller.cellHeight / 60,
+                                            left: columnWidth / eventGroup.length * i,
+                                            width: columnWidth / eventGroup.length,
                                             child: _buildEvent(eventGroup[i]),
                                           ),
                                       if (isToday)
                                         Positioned(
-                                          top: ((now.hour +
-                                                      (now.minute / 60.0)) *
-                                                  controller.cellHeight) -
-                                              1,
+                                          top: ((now.hour + (now.minute / 60.0)) * controller.cellHeight) - 1,
                                           width: columnWidth,
                                           child: Stack(
                                             clipBehavior: Clip.none,
@@ -445,11 +413,12 @@ class _TimetableState<T> extends State<Timetable<T>> {
     if (_isSnapping || !widget.snapToDay) return;
     _isSnapping = true;
     await Future.microtask(() => null);
-    final snapWidth = widget.scrollType == ScrollType.page
-        ? columnWidth * (widget.controller?.columns ?? 1)
-        : columnWidth;
-    final snapPosition =
-        ((_dayScrollController.offset) / snapWidth).round() * snapWidth;
+    if (!_dayScrollController.hasClients || !_dayHeadingScrollController.hasClients) {
+      return;
+    }
+    final snapWidth =
+        widget.scrollType == ScrollType.page ? columnWidth * (widget.controller?.columns ?? 1) : columnWidth;
+    final snapPosition = ((_dayScrollController.offset) / snapWidth).round() * snapWidth;
     _dayScrollController.animateTo(
       snapPosition,
       duration: widget.snapAnimationDuration,
@@ -476,23 +445,18 @@ class _TimetableState<T> extends State<Timetable<T>> {
 
   Future _jumpTo(DateTime date, {Duration? animationDuration}) async {
     final duration = animationDuration ?? const Duration(microseconds: 1);
-    final datePosition =
-        (date.difference(controller.start).inDays) * columnWidth;
-    final hourPosition =
-        ((date.hour) * controller.cellHeight) - (controller.cellHeight / 2);
+    final datePosition = (date.difference(controller.start).inDays) * columnWidth;
+    final hourPosition = ((date.hour) * controller.cellHeight) - (controller.cellHeight / 2);
     _isSnapping = true;
     await Future.wait([
-      _dayScrollController.animateTo(datePosition,
-          duration: duration, curve: Curves.linear),
-      _timeScrollController.animateTo(hourPosition,
-          duration: duration, curve: Curves.linear)
+      _dayScrollController.animateTo(datePosition, duration: duration, curve: Curves.linear),
+      _timeScrollController.animateTo(hourPosition, duration: duration, curve: Curves.linear)
     ]);
     _isSnapping = false;
     _snapToClosest();
   }
 
-  List<List<TimetableItem<T>>> _getGroupedOverlappingEvents(
-      List<TimetableItem<T>> events) {
+  List<List<TimetableItem<T>>> _getGroupedOverlappingEvents(List<TimetableItem<T>> events) {
     events.sort((a, b) => a.start.compareTo(b.start));
     List<List<TimetableItem<T>>> overlappingList = [];
     for (var element in events) {
@@ -500,8 +464,7 @@ class _TimetableState<T> extends State<Timetable<T>> {
         overlappingList.add(List.of([element]));
         continue;
       }
-      if (overlappingList.last
-          .any((prev) => element.start.compareTo(prev.end) < 0)) {
+      if (overlappingList.last.any((prev) => element.start.compareTo(prev.end) < 0)) {
         overlappingList.last.add(element);
       } else {
         overlappingList.add(List.of([element]));

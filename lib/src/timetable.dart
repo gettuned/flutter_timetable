@@ -164,6 +164,7 @@ class _TimetableState<T> extends State<Timetable<T>> {
   Widget build(BuildContext context) => LayoutBuilder(
       key: _key,
       builder: (context, contraints) {
+        final now = DateTime.now().toUtc().add(controller.timeZoneOffset);
         return Column(
           children: [
             SizedBox(
@@ -260,7 +261,6 @@ class _TimetableState<T> extends State<Timetable<T>> {
                                 final events =
                                     widget.items.where((event) => DateUtils.isSameDay(date, event.start)).toList();
                                 final groupedOverlappingEvents = _getGroupedOverlappingEvents(events);
-                                final now = DateTime.now().toUtc().add(controller.timeZoneOffset);
                                 final isToday = DateUtils.isSameDay(date, now);
                                 return Container(
                                   clipBehavior: Clip.none,

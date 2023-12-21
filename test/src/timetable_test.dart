@@ -43,7 +43,7 @@ void main() {
         ),
       ),
     );
-    final today = DateUtils.dateOnly(DateTime.now());
+    final today = DateUtils.dateOnly(DateTime.now().toUtc());
     final todayUtc = DateTime.utc(today.year, today.month, today.day);
     expect(find.text(todayUtc.toString()), findsOneWidget);
   });
@@ -56,8 +56,9 @@ void main() {
         ),
       ),
     );
-    final today = DateUtils.dateOnly(DateTime.now());
-    expect(find.text(today.toString()), findsOneWidget);
+    final today = DateUtils.dateOnly(DateTime.now().toUtc());
+    final todayUtc = DateTime.utc(today.year, today.month, today.day);
+    expect(find.text(todayUtc.toString()), findsOneWidget);
   });
 
   testWidgets("Timetable with custom hour label", (WidgetTester tester) async {

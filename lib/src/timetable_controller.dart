@@ -12,6 +12,9 @@ class TimetableController {
     /// The start date (first column) of the timetable. Default is today.
     DateTime? start,
 
+    /// The offset from UTC
+    this.timeZoneOffset = Duration.zero,
+
     /// The height of each cell in the timetable. Default is 50.
     double? cellHeight,
 
@@ -70,6 +73,8 @@ class TimetableController {
 
   /// The first date of the visible area of the timetable.
   DateTime get visibleDateStart => _visibleDateStart;
+
+  Duration timeZoneOffset;
 
   /// Allows listening to events dispatched from the timetable
   int addListener(Function(TimetableControllerEvent)? listener) {

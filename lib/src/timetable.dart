@@ -133,9 +133,9 @@ class _TimetableState<T> extends State<Timetable<T>> {
 
     if (event is TimetableColumnsChanged) {
       final prev = controller.visibleDateStart;
-      final now = DateTime.now();
+      final now = DateTime.now().toUtc().add(controller.timeZoneOffset);
       await adjustColumnWidth();
-      _jumpTo(DateTime(prev.year, prev.month, prev.day, now.hour, now.minute));
+      _jumpTo(DateTime.utc(prev.year, prev.month, prev.day, now.hour, now.minute));
       return;
     }
 
@@ -260,7 +260,7 @@ class _TimetableState<T> extends State<Timetable<T>> {
                                 final events =
                                     widget.items.where((event) => DateUtils.isSameDay(date, event.start)).toList();
                                 final groupedOverlappingEvents = _getGroupedOverlappingEvents(events);
-                                final now = DateTime.now();
+                                final now = DateTime.now().toUtc().add(controller.timeZoneOffset);
                                 final isToday = DateUtils.isSameDay(date, now);
                                 return Container(
                                   clipBehavior: Clip.none,
@@ -276,7 +276,7 @@ class _TimetableState<T> extends State<Timetable<T>> {
                                               width: columnWidth,
                                               height: controller.cellHeight,
                                               child: Center(
-                                                child: _buildCell(DateUtils.dateOnly(date).add(Duration(hours: i))),
+                                                child: _buildCell(date.add(Duration(hours: i))),
                                               ),
                                             ),
                                         ],
@@ -343,7 +343,7 @@ class _TimetableState<T> extends State<Timetable<T>> {
     if (widget.headerCellBuilder != null) {
       return widget.headerCellBuilder!(date);
     }
-    final weight = DateUtils.isSameDay(date, DateTime.now()) //
+    final weight = DateUtils.isSameDay(date, DateTime.now().toUtc().add(controller.timeZoneOffset))
         ? FontWeight.bold
         : FontWeight.normal;
     return Center(

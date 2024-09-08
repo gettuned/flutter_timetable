@@ -77,7 +77,7 @@ class _TimetableState<T> extends State<Timetable<T>> {
   final _dayHeadingScrollController = ScrollController();
   final _timeScrollController = ScrollController();
 
-  double columnWidth = 50.0;
+  double columnWidth = 0.0;
   TimetableController controller = TimetableController();
   final _key = GlobalKey();
 
@@ -444,6 +444,9 @@ class _TimetableState<T> extends State<Timetable<T>> {
   }
 
   Future _jumpTo(DateTime date, {Duration? animationDuration}) async {
+    if (!_dayScrollController.hasClients || !_dayHeadingScrollController.hasClients) {
+      return;
+    }
     final duration = animationDuration ?? const Duration(microseconds: 1);
     final datePosition = (date.difference(controller.start).inDays) * columnWidth;
     final hourPosition = ((date.hour) * controller.cellHeight) - (controller.cellHeight / 2);

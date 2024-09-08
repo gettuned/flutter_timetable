@@ -43,6 +43,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
     final today = DateUtils.dateOnly(DateTime.now().toUtc());
     final todayUtc = DateTime.utc(today.year, today.month, today.day);
     expect(find.text(todayUtc.toString()), findsOneWidget);
@@ -56,6 +57,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
     final today = DateUtils.dateOnly(DateTime.now().toUtc());
     final todayUtc = DateTime.utc(today.year, today.month, today.day);
     expect(find.text(todayUtc.toString()), findsOneWidget);
@@ -69,8 +71,7 @@ void main() {
         ),
       ),
     );
-    expect(find.text(const TimeOfDay(hour: 12, minute: 0).toString()),
-        findsOneWidget);
+    expect(find.text(const TimeOfDay(hour: 12, minute: 0).toString()), findsOneWidget);
   });
 
   testWidgets("Timetable with custom day label", (WidgetTester tester) async {
@@ -172,7 +173,7 @@ void main() {
     expect(find.text("TEST"), findsNWidgets(2));
   });
 
-  testWidgets("controller columns changed", (tester) async {
+  testWidgets("drag to new date", (tester) async {
     final controller = TimetableController(
       start: DateTime(2020, 1, 1),
     );
@@ -184,10 +185,9 @@ void main() {
         ),
       ),
     );
-
+    await tester.pumpAndSettle();
     // drag to the left
-    await tester.drag(
-        find.text(DateTime.utc(2020, 1, 1).toString()), const Offset(-200, -200));
+    await tester.drag(find.text(DateTime.utc(2020, 1, 1).toString()), const Offset(-200, -200));
     await tester.pumpAndSettle();
     expect(find.text(DateTime.utc(2020, 1, 4).toString()), findsOneWidget);
   });

@@ -282,15 +282,23 @@ class _TimetableState<T> extends State<Timetable<T>> {
                                         ],
                                       ),
                                       for (final List<TimetableItem<T>> eventGroup in groupedOverlappingEvents)
-                                        for (int i = 0; i < eventGroup.length; i++)
-                                          Positioned(
-                                            top: (eventGroup[i].start.hour + (eventGroup[i].start.minute / 60)) *
-                                                controller.cellHeight,
-                                            height: eventGroup[i].duration.inMinutes * controller.cellHeight / 60,
+                                        ...eventGroup.asMap().entries.map<Widget>((eventGroupEntry) {
+                                          final i = eventGroupEntry.key;
+                                          final top = (eventGroup[i].start.hour + (eventGroup[i].start.minute / 60)) *
+                                              controller.cellHeight;
+                                          var height = eventGroup[i].duration.inMinutes * controller.cellHeight / 60;
+                                          if (top + height > controller.cellHeight * 24.0) {
+                                            // if the event exceeds the bottom of the table
+                                            height = controller.cellHeight * 24.0 - top;
+                                          }
+                                          return Positioned(
+                                            top: top,
+                                            height: height,
                                             left: columnWidth / eventGroup.length * i,
                                             width: columnWidth / eventGroup.length,
                                             child: _buildEvent(eventGroup[i]),
-                                          ),
+                                          );
+                                        }).toList(),
                                       if (isToday)
                                         Positioned(
                                           top: ((now.hour + (now.minute / 60.0)) * controller.cellHeight) - 1,
@@ -388,15 +396,25 @@ class _TimetableState<T> extends State<Timetable<T>> {
   final _hmma = DateFormat("h:mm a");
   Widget _buildEvent(TimetableItem<T> event) {
     if (widget.itemBuilder != null) return widget.itemBuilder!(event);
+    bool extendsBeyondMidnight = event.end.hour < event.start.hour;
+    final borderSide = BorderSide(
+      color: Theme.of(context).dividerColor,
+      width: 0.5,
+    );
     return Container(
       padding: const EdgeInsets.all(5),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: Theme.of(context).dividerColor,
-          width: 0.5,
-        ),
+        borderRadius: BorderRadius.only(
+            bottomLeft: extendsBeyondMidnight ? const Radius.circular(0) : const Radius.circular(8),
+            bottomRight: extendsBeyondMidnight ? const Radius.circular(0) : const Radius.circular(8),
+            topLeft: const Radius.circular(8),
+            topRight: const Radius.circular(8)),
+        border: Border(
+            top: borderSide,
+            bottom: extendsBeyondMidnight ? BorderSide.none : borderSide,
+            left: borderSide,
+            right: borderSide),
       ),
       child: Text(
         "${_hmma.format(event.start)} - ${_hmma.format(event.end)}",

@@ -1,6 +1,8 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 
+enum ScrollType { heavy, medium, page, none }
+
 /// A controller for the timetable.
 ///
 /// The controller allow intialization of the timetable and to expose timetable functionality to the outside.
@@ -26,6 +28,9 @@ class TimetableController {
 
     /// Controller event listener.
     Function(TimetableControllerEvent)? onEvent,
+
+    /// Scroll type
+    ScrollType? scrollType = ScrollType.none,
   }) {
     var startDate = start ?? DateTime.now();
     _columns = initialColumns;
@@ -34,6 +39,7 @@ class TimetableController {
     _headerHeight = headerHeight ?? 50;
     _timelineWidth = timelineWidth ?? 50;
     _visibleDateStart = _start;
+    _scrollType = scrollType ?? ScrollType.none;
     if (onEvent != null) addListener(onEvent);
   }
 
@@ -75,6 +81,11 @@ class TimetableController {
   DateTime get visibleDateStart => _visibleDateStart;
 
   Duration timeZoneOffset;
+
+  ScrollType _scrollType = ScrollType.none;
+
+  /// The current scroll type
+  ScrollType get scrollType => _scrollType;
 
   /// Allows listening to events dispatched from the timetable
   int addListener(Function(TimetableControllerEvent)? listener) {
@@ -127,6 +138,11 @@ class TimetableController {
     _visibleDateStart = date;
     dispatch(TimetableVisibleDateChanged(date));
   }
+
+  setScrollType(ScrollType type) {
+    _scrollType = type;
+    dispatch(TimetableScrollTypeChanged(type));
+  }
 }
 
 /// A generic event that can be dispatched from the timetable controller
@@ -161,4 +177,9 @@ class TimetableStartChanged extends TimetableControllerEvent {
 class TimetableVisibleDateChanged extends TimetableControllerEvent {
   TimetableVisibleDateChanged(this.start);
   final DateTime start;
+}
+
+class TimetableScrollTypeChanged extends TimetableControllerEvent {
+  TimetableScrollTypeChanged(this.type);
+  final ScrollType type;
 }

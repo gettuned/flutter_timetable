@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 
 import '../flutter_timetable.dart';
 
-enum ScrollType { heavy, medium, page, none }
 
 /// The [Timetable] widget displays calendar like view of the events that scrolls
 /// horizontally through the days and vertical through the hours.
@@ -43,9 +42,6 @@ class Timetable<T> extends StatefulWidget {
   /// Color of indicator line that shows the current time. Default is `Theme.indicatorColor`.
   final Color? nowIndicatorColor;
 
-  /// ScrollType to use
-  final ScrollType? scrollType;
-
   final Future<void> Function()? onRefresh;
 
   /// The [Timetable] widget displays calendar like view of the events that scrolls
@@ -64,7 +60,6 @@ class Timetable<T> extends StatefulWidget {
       this.snapToDay = true,
       this.snapAnimationDuration = const Duration(milliseconds: 300),
       this.snapAnimationCurve = Curves.bounceOut,
-      this.scrollType = ScrollType.none,
       this.onRefresh})
       : super(key: key);
 
@@ -99,8 +94,9 @@ class _TimetableState<T> extends State<Timetable<T>> {
     super.initState();
   }
 
+
   ScrollPhysics? _getHorizontalScrollPhysics() {
-    switch (widget.scrollType) {
+    switch (controller.scrollType) {
       case ScrollType.heavy:
         return const TimetableHeavyScrollPhysics();
 
@@ -110,7 +106,6 @@ class _TimetableState<T> extends State<Timetable<T>> {
       case ScrollType.page:
         return const TimetablePageScrollPhysics();
       case ScrollType.none:
-      case null:
         return null;
     }
   }
@@ -137,6 +132,10 @@ class _TimetableState<T> extends State<Timetable<T>> {
       await adjustColumnWidth();
       _jumpTo(DateTime.utc(prev.year, prev.month, prev.day, now.hour, now.minute));
       return;
+    }
+
+    if (event is TimetableScrollTypeChanged) {
+      _horizontalScrollPhysics = _getHorizontalScrollPhysics();
     }
 
     if (mounted) setState(() {});
@@ -435,7 +434,7 @@ class _TimetableState<T> extends State<Timetable<T>> {
       return;
     }
     final snapWidth =
-        widget.scrollType == ScrollType.page ? columnWidth * (widget.controller?.columns ?? 1) : columnWidth;
+        controller.scrollType == ScrollType.page ? columnWidth * (widget.controller?.columns ?? 1) : columnWidth;
     final snapPosition = ((_dayScrollController.offset) / snapWidth).round() * snapWidth;
     _dayScrollController.animateTo(
       snapPosition,

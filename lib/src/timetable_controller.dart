@@ -14,6 +14,12 @@ class TimetableController {
     /// The start date (first column) of the timetable. Default is today.
     DateTime? start,
 
+    /// The start time of the timetable. Default is 00:00.
+    // TimeOfDay? startTime = const TimeOfDay(hour: 0, minute: 0),
+
+    /// The end time of the timetable. Default is 23:59.
+    // TimeOfDay? endTime = const TimeOfDay(hour: 23, minute: 59),
+
     /// The offset from UTC
     this.timeZoneOffset = Duration.zero,
 

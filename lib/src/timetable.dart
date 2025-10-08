@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 
 import '../flutter_timetable.dart';
 
-
 /// The [Timetable] widget displays calendar like view of the events that scrolls
 /// horizontally through the days and vertical through the hours.
 /// <img src="https://github.com/gettuned/flutter_timetable/raw/main/images/default.gif" width="400" />
@@ -48,7 +47,7 @@ class Timetable<T> extends StatefulWidget {
   /// horizontally through the days and vertical through the hours.
   /// <img src="https://github.com/gettuned/flutter_timetable/raw/main/images/default.gif" width="400" />
   const Timetable(
-      {Key? key,
+      {super.key,
       this.controller,
       this.cellBuilder,
       this.headerCellBuilder,
@@ -60,8 +59,7 @@ class Timetable<T> extends StatefulWidget {
       this.snapToDay = true,
       this.snapAnimationDuration = const Duration(milliseconds: 300),
       this.snapAnimationCurve = Curves.bounceOut,
-      this.onRefresh})
-      : super(key: key);
+      this.onRefresh});
 
   @override
   State<Timetable<T>> createState() => _TimetableState<T>();
@@ -78,7 +76,7 @@ class _TimetableState<T> extends State<Timetable<T>> {
 
   ScrollPhysics? _horizontalScrollPhysics;
 
-  Color get nowIndicatorColor => widget.nowIndicatorColor ?? Theme.of(context).indicatorColor;
+  Color get nowIndicatorColor => widget.nowIndicatorColor ?? Theme.of(context).tabBarTheme.indicatorColor ?? Colors.red;
   int? _listenerId;
   @override
   void initState() {
@@ -93,7 +91,6 @@ class _TimetableState<T> extends State<Timetable<T>> {
 
     super.initState();
   }
-
 
   ScrollPhysics? _getHorizontalScrollPhysics() {
     switch (controller.scrollType) {
@@ -121,7 +118,7 @@ class _TimetableState<T> extends State<Timetable<T>> {
     super.dispose();
   }
 
-  _eventHandler(TimetableControllerEvent event) async {
+  Future<void> _eventHandler(TimetableControllerEvent event) async {
     if (event is TimetableJumpToRequested) {
       _jumpTo(event.date, animationDuration: event.animationDuration);
     }
@@ -138,7 +135,7 @@ class _TimetableState<T> extends State<Timetable<T>> {
       _horizontalScrollPhysics = _getHorizontalScrollPhysics();
     }
 
-    if (mounted) setState(() {});
+    // if (mounted) setState(() {});
   }
 
   Future adjustColumnWidth() async {
@@ -297,7 +294,7 @@ class _TimetableState<T> extends State<Timetable<T>> {
                                             width: columnWidth / eventGroup.length,
                                             child: _buildEvent(eventGroup[i]),
                                           );
-                                        }).toList(),
+                                        }),
                                       if (isToday)
                                         Positioned(
                                           top: ((now.hour + (now.minute / 60.0)) * controller.cellHeight) - 1,
@@ -449,14 +446,14 @@ class _TimetableState<T> extends State<Timetable<T>> {
     _isSnapping = false;
   }
 
-  _updateVisibleDate() async {
+  Future<void> _updateVisibleDate() async {
     final date = controller.start.add(Duration(
       days: (_dayHeadingScrollController.position.pixels / columnWidth).round(),
       hours: _timeScrollController.position.pixels ~/ controller.cellHeight,
     ));
     if (date != controller.visibleDateStart) {
       controller.updateVisibleDate(date);
-      setState(() {});
+      // setState(() {});
     }
   }
 

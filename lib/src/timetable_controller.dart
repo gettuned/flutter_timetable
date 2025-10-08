@@ -125,14 +125,14 @@ class TimetableController {
   }
 
   /// Updates the number of columns in the timetable
-  setColumns(int i) {
+  void setColumns(int i) {
     if (i == _columns) return;
     _columns = i;
     dispatch(TimetableColumnsChanged(i));
   }
 
   /// Updates the height of each cell in the timetable
-  setCellHeight(double height) {
+  void setCellHeight(double height) {
     if (height == _cellHeight) return;
     if (height <= 0) return;
     _cellHeight = min(height, 1000);
@@ -145,7 +145,7 @@ class TimetableController {
     dispatch(TimetableVisibleDateChanged(date));
   }
 
-  setScrollType(ScrollType type) {
+  void setScrollType(ScrollType type) {
     _scrollType = type;
     dispatch(TimetableScrollTypeChanged(type));
   }

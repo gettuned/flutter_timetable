@@ -22,8 +22,7 @@ class TimetablePageScrollPhysics extends PageScrollPhysics {
 }
 
 class TimetableHeavyScrollPhysics extends ScrollPhysics {
-  const TimetableHeavyScrollPhysics({ScrollPhysics? parent})
-      : super(parent: parent);
+  const TimetableHeavyScrollPhysics({super.parent});
 
   @override
   TimetableHeavyScrollPhysics applyTo(ScrollPhysics? ancestor) {
@@ -44,8 +43,7 @@ class TimetableHeavyScrollPhysics extends ScrollPhysics {
 }
 
 class TimetableMediumScrollPhysics extends ClampingScrollPhysics {
-  const TimetableMediumScrollPhysics({ScrollPhysics? parent})
-      : super(parent: parent);
+  const TimetableMediumScrollPhysics({super.parent});
 
   @override
   TimetableMediumScrollPhysics applyTo(ScrollPhysics? ancestor) {

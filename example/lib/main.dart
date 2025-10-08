@@ -126,7 +126,8 @@ class _CustomTimetableScreenState extends State<CustomTimetableScreen> {
               child: Text(
                 DateFormat("MM/d/yyyy\nha").format(datetime),
                 style: TextStyle(
-                  color: Color(0xff000000 + (0x002222 * datetime.hour) + (0x110000 * datetime.day)).withOpacity(0.5),
+                  color:
+                      Color(0xff000000 + (0x002222 * datetime.hour) + (0x110000 * datetime.day)).withValues(alpha: 0.5),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -171,7 +172,7 @@ class _CustomTimetableScreenState extends State<CustomTimetableScreen> {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),

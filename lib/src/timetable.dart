@@ -76,7 +76,7 @@ class _TimetableState<T> extends State<Timetable<T>> {
 
   ScrollPhysics? _horizontalScrollPhysics;
 
-  Color get nowIndicatorColor => widget.nowIndicatorColor ?? Theme.of(context).tabBarTheme.indicatorColor ?? Colors.red;
+  Color get nowIndicatorColor => widget.nowIndicatorColor ?? Theme.of(context).colorScheme.onSurface;
   int? _listenerId;
   @override
   void initState() {
